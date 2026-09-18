@@ -24,10 +24,10 @@ $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$,
 respectively, where
 
 $$
-\begin{aligned}
+\begin{align}
 X_t + 0.7X_{t-1} &= \varepsilon_t,\quad \varepsilon_t \sim N\left(0, 1\right)\\
 Y_t + 0.7Y_{t-1} &= u_t,\quad u_t \sim N\left(0, 2\right),
-\end{aligned}
+\end{align}
 $$ where $\varepsilon_t$ and $u_t$ are independent innovation processes.
 
 The time series is generated using the [`signal`
