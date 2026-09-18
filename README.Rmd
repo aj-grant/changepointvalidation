@@ -1,0 +1,187 @@
+---
+title: "Parametric tests for comparing time series"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+source("ardisc_fun.R")
+```
+
+This page contains R code to implement the likelihood ratio tests for comparing two time series described in:
+
+Grant, AJ and Quinn, BG (2017). Parametric spectral discrimination. *Journal of Time Series Analysis*, 38(6):838--864. doi: [https://doi.org/10.1111/jtsa.12238](https://doi.org/10.1111/jtsa.12238)
+
+Ma, L, Grant, AJ and Sofronov, G. Multiple change point detection and validation in autoregressive time series data (2020). *Statistical papers*, 61:1507--1528. doi: [https://doi.org/10.1007/s00362-020-01198-w](https://doi.org/10.1007/s00362-020-01198-w)
+
+The file `ardisc_fun.R` contains the function `ardisc()` to implement these tests.
+
+## Simulation example: change point validation
+
+In this example, a time series is generated of length $T=200$, with a change in innovation variance at time $t=100$. The segments either side of this point are realisations from AR(1) processes, denoted $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$, respectively, where
+$$
+\begin{align*}
+  X_t + 0.7X_{t-1} &= \varepsilon_t,\quad \varepsilon_t \sim N\left(0, 1\right)\\
+  Y_t + 0.7Y_{t-1} &= u_t,\quad u_t \sim N\left(0, 2\right),
+\end{align*}
+$$
+where $\varepsilon_t$ and $u_t$ are independent innovation processes.
+
+The time series is generated using the [`signal` package](https://r-forge.r-project.org/projects/signal/).
+```{R}
+set.seed(20260902)
+T0 = 200
+ex = rnorm(T0/2, 0, 1)
+ey = rnorm(T0/2, 0, sqrt(2))
+z = signal::filter(1, c(1, 0.7), c(ex, ey))
+```
+
+The plots below show A) the full time series, B) the autocovariance functions, and C) the autocorrelation functions, up to lag $p=\left\lfloor \left(\textrm{log} 100 \right)^{1.01 }\right\rfloor = 4$.
+
+```{r, echo=FALSE}
+library(ggplot2)
+library(ggpubr)
+
+full_ts_dat = data.frame("t" = 0:(T0-1), "z" = z)
+
+plot_full_ts = 
+  ggplot(full_ts_dat, aes(x = t, y = z)) +
+  geom_vline(xintercept = T0/2, linetype = "dashed") +
+  geom_line(linewidth = 0.25) +
+  scale_x_continuous(expand = c(0, 0),
+                     breaks = c(0, 1/4, 0.5, 3/4, 1)*T0,
+                     labels = c(0, "", T0/2, "",T0)) +
+  xlab(expression(t)) +
+  scale_x_continuous(expand = expansion(mult = c(0.027, 0.02))) +
+  theme_bw() +
+  theme(axis.title.y = element_blank(), axis.text.y = element_blank(), axis.ticks.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        plot.margin = margin(t = 5, l = 29),
+        axis.title = element_text(size = 6.4),
+        text = element_text(size = 8))
+
+P = floor(log(T0/2)^1.01)
+cx = acf(z[1:(T0/2)], P)
+cy = acf(z[(T0/2+1):T0], P)
+acfx = cx / cx[1]
+acfy = cy / cy[1]
+
+plot_cx =
+  ggplot(data.frame("p" = 0:P, "g" = cx), aes(x = p, y = g)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_segment(aes(xend = p, yend = 0), linewidth = 0.75) +
+  ylab(expression(hat(gamma)[X](j))) +
+  ylim(c(-3.5, 5)) +
+  theme_bw() +
+  theme(plot.margin = margin(t = 5, l = 5, b = 10),
+        axis.title.x = element_blank(),
+        axis.title = element_text(size = 6.4),
+        text = element_text(size = 8))
+
+plot_acfx =
+  ggplot(data.frame("p" = 0:P, "r" = acfx), aes(x = p, y = r)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_segment(aes(xend = p, yend = 0), linewidth = 0.75) +
+  xlab("Lag (j)") + ylab(expression(ACF[X](j))) + 
+  theme_bw() +
+  theme(plot.margin = margin(t = 5),
+        axis.title = element_text(size = 6.4),
+        text = element_text(size = 8))
+
+plot_cy =
+  ggplot(data.frame("p" = 0:P, "g" = cy), aes(x = p, y = g)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_segment(aes(xend = p, yend = 0), linewidth = 0.75) +
+  xlab("Lag (j)") + ylab(expression(hat(gamma)[Y](j))) +
+  ylim(c(-3.5, 5)) + 
+  theme_bw() +
+  theme(plot.margin = margin(t = 5, l = 5, b = 10),
+        axis.title.x = element_blank(),
+        axis.title = element_text(size = 6.4),
+        text = element_text(size = 8))
+
+plot_acfy =
+  ggplot(data.frame("p" = 0:P, "r" = acfy), aes(x = p, y = r)) +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "gray50") +
+  geom_segment(aes(xend = p, yend = 0), linewidth = 0.75) +
+  xlab("Lag (j)") + ylab(expression(ACF[Y](j))) + 
+  theme_bw() +
+  theme(plot.margin = margin(t = 5),
+        axis.title = element_text(size = 6.4),
+        text = element_text(size = 8))
+
+plot_ex =
+  ggarrange(plot_full_ts,
+            ggarrange(plot_cx, NULL, plot_cy, widths = c(1, 0.05, 1), nrow = 1),
+            ggarrange(plot_acfx, NULL, plot_acfy, widths = c(1, 0.05, 1), nrow = 1),
+            nrow = 3,
+            labels = c("A", "B", "C"),
+            font.label = list(size = 8)
+)
+
+print(plot_ex)
+```
+
+### The null hypotheses
+
+The goal is to apply the likelihood ratio procedure to test whether there is a true change point at time $t=100$. The time series will be modelled as autoregressions of order 4, that is
+$$
+  \begin{align*}
+    X_t + \sum_{j=1}^4 \beta_{X,j} X_{t-j} &= \varepsilon_t\\
+    Y_t + \sum_{j=1}^4 \beta_{Y,j} Y_{t-j} &= u_t,
+  \end{align*}
+$$
+
+where $\textrm{var}\left(\varepsilon_t\right)=\sigma^2_{\varepsilon}$ and $\textrm{var}\left(u_t\right)=\sigma^2_{u}$. Three hypothesis tests will be applied, each considering a different definition of a change point.
+
+$$
+  \begin{align*}
+    &H_0^{\left(1\right)}: \beta_{X,1} = \cdots = \beta_{X,4}\\
+    &H_0^{\left(2\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\, \sigma^2_{\varepsilon}=\sigma^2_{u}\\
+    &H_0^{\left(3\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\, \sigma^2_{\varepsilon}=\sigma^2_{u}, E\left(X_t\right) = E\left(Y_t\right)
+  \end{align*}
+$$
+Under $H_0^{\left(1\right)}$, $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$ have the same autocorrelation structure. Under $H_0^{\left(2\right)}$, $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$ have the same autocovariance function. Under $H_0^{\left(3\right)}$, $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$ have the same autocovariance function and the same mean.
+
+### Parameter estimation under the alternative hypotheses
+
+Under the alternative hypotheses, $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$ are independent processes and their parameters can be estimated separately using the Levinson-Durbin algorithm. The `acf()` function is first used to compute the sample autocovariance functions up to lag $4$. These are then input into the `ldar()` function.
+
+```{r}
+cx = acf(z[1:(T0/2)], p = 4)
+parestx = ldar(cx)
+print(parestx)
+
+cy = acf(z[(T0/2+1):T0], p = 4)
+paresty = ldar(cy)
+print(paresty)
+```
+
+### Testing $H_0^{\left(1\right)}$
+
+Under $H_0^{\left(1\right)}$, the autoregressive parameters of $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$ are the same, but the innovation variances and means may be different. We can therefore estimate the common autoregressive parameters, the innovation variances under the null, and the test statistic using the `ardisc()` function with the default arguments of `mu_cp = FALSE` and `sigma_cp = FALSE`.
+
+```{r}
+test_H01 = ardisc(z[1:(T0/2)], z[(T0/2+1):T0], mu_cp = FALSE, sigma_cp = FALSE)
+print(test_H01)
+```
+
+### Testing $H_0^{\left(2\right)}$
+
+Under $H_0^{\left(2\right)}$, the autoregressive parameters and innovation variances of $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$ are the same, but the means may be different. We can therefore estimate the common autoregressive parameters, the innovation variances under the null, and the test statistic using the `ardisc()` function with the default arguments of `mu_cp = FALSE` and `sigma_cp = TRUE`.
+
+```{r}
+test_H02 = ardisc(z[1:(T0/2)], z[(T0/2+1):T0], mu_cp = FALSE, sigma_cp = TRUE)
+print(test_H02)
+```
+
+### Testing $H_0^{\left(3\right)}$
+
+Under $H_0^{\left(3\right)}$, the autoregressive parameters, innovation variances, and means of $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$ are the same. We can therefore estimate the common autoregressive parameters, the innovation variances under the null, and the test statistic using the `ardisc()` function with the default arguments of `mu_cp = TRUE` and `sigma_cp = TRUE`.
+
+```{r}
+test_H02 = ardisc(z[1:(T0/2)], z[(T0/2+1):T0], mu_cp = TRUE, sigma_cp = TRUE)
+print(test_H02)
+```
