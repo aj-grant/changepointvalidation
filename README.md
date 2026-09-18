@@ -22,10 +22,10 @@ change in innovation variance at time $t=100$. The segments either side
 of this point are realisations from AR(1) processes, denoted
 $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$,
 respectively, where $$
-\begin{align*}
+\begin{align}
   X_t + 0.7X_{t-1} &= \varepsilon_t,\quad \varepsilon_t \sim N\left(0, 1\right)\\
   Y_t + 0.7Y_{t-1} &= u_t,\quad u_t \sim N\left(0, 2\right),
-\end{align*}
+\end{align}
 $$ where $\varepsilon_t$ and $u_t$ are independent innovation processes.
 
 The time series is generated using the [`signal`
@@ -62,11 +62,11 @@ will be applied, each considering a different definition of a change
 point.
 
 $$
-  \begin{align*}
+  \begin{align}
     &H_0^{\left(1\right)}: \beta_{X,1} = \cdots = \beta_{X,4}\\
     &H_0^{\left(2\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\, \sigma^2_{\varepsilon}=\sigma^2_{u}\\
     &H_0^{\left(3\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\, \sigma^2_{\varepsilon}=\sigma^2_{u}, E\left(X_t\right) = E\left(Y_t\right)
-  \end{align*}
+  \end{align}
 $$ Under $H_0^{\left(1\right)}$, $\left\lbrace X_t \right\rbrace$ and
 $\left\lbrace Y_t \right\rbrace$ have the same autocorrelation
 structure. Under $H_0^{\left(2\right)}$,
