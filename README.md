@@ -30,7 +30,7 @@ Y_t + 0.7Y_{t-1} &= u_t,\quad u_t \sim N\left(0, 2\right),
 \end{align}
 $$
 
-where $\varepsilon_t$ and $u_t$ are independent innovation processes.
+and $\varepsilon_t$ and $u_t$ are independent innovation processes.
 
 The time series is generated using the [`signal`
 package](https://r-forge.r-project.org/projects/signal/).
@@ -43,11 +43,16 @@ ey = rnorm(T0/2, 0, sqrt(2))
 z = signal::filter(1, c(1, 0.7), c(ex, ey))
 ```
 
-The plots below show A) the full time series, B) the autocovariance
-functions, and C) the autocorrelation functions, up to lag
-$p=\left\lfloor \left(\textrm{log} 100 \right)^{1.01 }\right\rfloor = 4$.
+The full time series is shown below, with the vertical dashed line
+indicating the point where the innovation variance changes.
 
 ![](README_files/figure-gfm/unnamed-chunk-2-1.png)<!-- -->
+
+The autocovariance functions and autocorrelation functions, up to lag
+$p=\left\lfloor \left(\textrm{log} 100 \right)^{1.01 }\right\rfloor = 4$,
+are shown below.
+
+![](README_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->![](README_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
 
 ### The null hypotheses
 

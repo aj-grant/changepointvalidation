@@ -31,7 +31,7 @@ Y_t + 0.7Y_{t-1} &= u_t,\quad u_t \sim N\left(0, 2\right),
 \end{align}
 $$
 
-where $\varepsilon_t$ and $u_t$ are independent innovation processes.
+and $\varepsilon_t$ and $u_t$ are independent innovation processes.
 
 The time series is generated using the [`signal` package](https://r-forge.r-project.org/projects/signal/).
 ```{R}
@@ -42,12 +42,10 @@ ey = rnorm(T0/2, 0, sqrt(2))
 z = signal::filter(1, c(1, 0.7), c(ex, ey))
 ```
 
-The plots below show A) the full time series, B) the autocovariance functions, and C) the autocorrelation functions, up to lag $p=\left\lfloor \left(\textrm{log} 100 \right)^{1.01 }\right\rfloor = 4$.
+The full time series is shown below, with the vertical dashed line indicating the point where the innovation variance changes.
 
 ```{r, echo=FALSE}
 library(ggplot2)
-library(ggpubr)
-
 full_ts_dat = data.frame("t" = 0:(T0-1), "z" = z)
 
 plot_full_ts = 
@@ -65,6 +63,14 @@ plot_full_ts =
         plot.margin = margin(t = 5, l = 29),
         axis.title = element_text(size = 6.4),
         text = element_text(size = 8))
+
+plot_full_ts
+```
+
+The autocovariance functions and autocorrelation functions, up to lag $p=\left\lfloor \left(\textrm{log} 100 \right)^{1.01 }\right\rfloor = 4$, are shown below.
+
+```{r, echo=FALSE}
+library(ggpubr)
 
 P = floor(log(T0/2)^1.01)
 cx = acf(z[1:(T0/2)], P)
@@ -116,16 +122,14 @@ plot_acfy =
         axis.title = element_text(size = 6.4),
         text = element_text(size = 8))
 
-plot_ex =
-  ggarrange(plot_full_ts,
-            ggarrange(plot_cx, NULL, plot_cy, widths = c(1, 0.05, 1), nrow = 1),
-            ggarrange(plot_acfx, NULL, plot_acfy, widths = c(1, 0.05, 1), nrow = 1),
-            nrow = 3,
-            labels = c("A", "B", "C"),
-            font.label = list(size = 8)
-)
+plot_cov = ggarrange(plot_cx, NULL, plot_cy, widths = c(1, 0.05, 1), nrow = 1,
+                     font.label = list(size = 8))
 
-print(plot_ex)
+plot_acf = ggarrange(plot_acfx, NULL, plot_acfy, widths = c(1, 0.05, 1), nrow = 1,
+                     font.label = list(size = 8))
+
+plot_cov
+plot_acf
 ```
 
 ### The null hypotheses
@@ -138,7 +142,6 @@ X_t + \sum_{j=1}^4 \beta_{X,j} X_{t-j} &= \varepsilon_t\\
 Y_t + \sum_{j=1}^4 \beta_{Y,j} Y_{t-j} &= u_t,
 \end{align}
 $$
-
 
 where $\textrm{var}\left(\varepsilon_t\right)=\sigma^2_{\varepsilon}$ and $\textrm{var}\left(u_t\right)=\sigma^2_{u}$. Three hypothesis tests will be applied, each considering a different definition of a change point.
 
