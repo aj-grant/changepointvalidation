@@ -44,7 +44,7 @@ z = signal::filter(1, c(1, 0.7), c(ex, ey))
 
 The full time series is shown below, with the vertical dashed line indicating the point where the innovation variance changes.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=2}
 library(ggplot2)
 full_ts_dat = data.frame("t" = 0:(T0-1), "z" = z)
 
@@ -69,7 +69,7 @@ plot_full_ts
 
 The autocovariance functions and autocorrelation functions, up to lag $p=\left\lfloor \left(\textrm{log} 100 \right)^{1.01 }\right\rfloor = 4$, are shown below.
 
-```{r, echo=FALSE}
+```{r, echo=FALSE, fig.height=1.5}
 library(ggpubr)
 
 P = floor(log(T0/2)^1.01)
