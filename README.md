@@ -75,8 +75,8 @@ point.
 $$
 \begin{align}
 &H_0^{\left(1\right)}: \beta_{X,1} = \cdots = \beta_{X,4}\\
-&H_0^{\left(2\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\, \sigma^2_{\varepsilon}=\sigma^2_{u}\\
-&H_0^{\left(3\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\, \sigma^2_{\varepsilon}=\sigma^2_{u}, E\left(X_t\right) = E\left(Y_t\right)
+&H_0^{\left(2\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\quad \sigma^2_{\varepsilon}=\sigma^2_{u}\\
+&H_0^{\left(3\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\quad \sigma^2_{\varepsilon}=\sigma^2_{u},\quad E\left(X_t\right) = E\left(Y_t\right)
 \end{align}
 $$
 
