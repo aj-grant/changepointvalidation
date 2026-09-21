@@ -53,7 +53,9 @@ $p=\left\lfloor \left(\textrm{log} 100 \right)^{1.01 }\right\rfloor = 4$.
 
 The goal is to apply the likelihood ratio procedure to test whether
 there is a true change point at time $t=100$. The time series will be
-modelled as autoregressions of order 4, that is $$
+modelled as autoregressions of order 4, that is
+
+$$
 \begin{align}
 X_t + \sum_{j=1}^4 \beta_{X,j} X_{t-j} &= \varepsilon_t\\
 Y_t + \sum_{j=1}^4 \beta_{Y,j} Y_{t-j} &= u_t,
@@ -71,7 +73,9 @@ $$
 &H_0^{\left(2\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\, \sigma^2_{\varepsilon}=\sigma^2_{u}\\
 &H_0^{\left(3\right)}: \beta_{X,1} = \cdots = \beta_{X,4},\, \sigma^2_{\varepsilon}=\sigma^2_{u}, E\left(X_t\right) = E\left(Y_t\right)
 \end{align}
-$$ Under $H_0^{\left(1\right)}$, $\left\lbrace X_t \right\rbrace$ and
+$$
+
+Under $H_0^{\left(1\right)}$, $\left\lbrace X_t \right\rbrace$ and
 $\left\lbrace Y_t \right\rbrace$ have the same autocorrelation
 structure. Under $H_0^{\left(2\right)}$,
 $\left\lbrace X_t \right\rbrace$ and $\left\lbrace Y_t \right\rbrace$
