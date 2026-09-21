@@ -1,6 +1,8 @@
 ---
 title: "Parametric tests for comparing time series"
-output: github_document
+output:
+  github_document:
+    math_method: "default"
 ---
 
 ```{r setup, include=FALSE}
